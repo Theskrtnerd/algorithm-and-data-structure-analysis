@@ -70,22 +70,23 @@ class AVLTree {
             }
             else {
                 if(!node->left && !node->right) {
-                    node = nullptr;
                     s.erase(val);
+                    node = nullptr;
                 }
                 else if (node->left && node->right) {
-                    TreeNode* minVal = node->right;
-                    while(minVal->left) {
-                        minVal = minVal->left;
+                    TreeNode* temp = node->right;
+                    while(temp->left) {
+                        temp = temp->left;
                     }
-                    node->value = minVal->value;
-                    node->right = removeNode(node->right, minVal->value);
+                    node->value = temp->value;
+                    temp = temp->right;
+                    s.erase(val);
                 }
                 else {
+                    s.erase(val);
                     TreeNode* temp = node->left ? node->left : node->right;
                     node = temp;
                     delete temp;
-                    s.erase(val);
                 }
             }
 
