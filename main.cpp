@@ -63,57 +63,39 @@ class AVLTree {
         TreeNode* removeNode(TreeNode* node, int val) {
             if (node == nullptr) return node;
 
+            // Perform standard BST delete
             if (val < node->value) {
                 node->left = removeNode(node->left, val);
-            }
-            else if (val > node->value) {
+            } else if (val > node->value) {
                 node->right = removeNode(node->right, val);
-            }
-            else {
-                if (node->left == nullptr || node->right == nullptr) {
-                    TreeNode* temp = node->left ? node->left : node->right;
-                    if (temp == nullptr) {
-                        temp = node;
-                        node = nullptr;
-                    }
-                    else {
-                        *node = *temp;
-                    }
-                    delete temp;
-                    s.erase(val);
-                }
-                else {
-                    TreeNode* parent = node;
+            } else {
+                // Node with only one child or no child
+                if (node->left == nullptr) {
                     TreeNode* temp = node->right;
-
-                    while (temp->left != nullptr) {
-                        parent = temp;
-                        temp = temp->left;
-                    }
-
-                    node->value = temp->value;
-
-                    if (parent == node) {
-                        parent->right = temp->right;
-                    }
-                    else {
-                        parent->left = temp->right;
-                    }
-
-                    delete temp;
+                    delete node;
                     s.erase(val);
+                    return temp;
+                } else if (node->right == nullptr) {
+                    TreeNode* temp = node->left;
+                    delete node;
+                    s.erase(val);
+                    return temp;
                 }
+
+                // Node with two children
+                TreeNode* temp = minValueNode(node->right);
+                node->value = temp->value;
+                node->right = removeNode(node->right, temp->value);
             }
 
-            if (node == nullptr) return node;
-
+            // Update height and balance factor
             updateNode(node);
 
+            // Rebalance the node if needed
             if (node->bal > 1) {
                 if (node->left->bal >= 0) {
                     return rightRotate(node);
-                }
-                else {
+                } else {
                     node->left = leftRotate(node->left);
                     return rightRotate(node);
                 }
@@ -121,15 +103,21 @@ class AVLTree {
             if (node->bal < -1) {
                 if (node->right->bal <= 0) {
                     return leftRotate(node);
-                }
-                else {
+                } else {
                     node->right = rightRotate(node->right);
                     return leftRotate(node);
                 }
             }
 
             return node;
-        };
+        }
+        TreeNode* minValueNode(TreeNode* node) {
+            TreeNode* current = node;
+            while (current && current->left != nullptr) {
+                current = current->left;
+            }
+            return current;
+        }
         void updateNode(TreeNode* node) {
             int hL =0, hR =0;
             if(node->left) {
@@ -165,20 +153,18 @@ class AVLTree {
                 cout << "EMPTY" << endl;
                 return;
             }
+            if(!node) return;
             if(type == "PRE") {
-                if (!node) return;
                 cout << node->value << " ";
                 if (node->left) printTree(node->left, type);
                 if (node->right) printTree(node->right, type);
             }
             else if (type == "POST") {
-                if (!node) return;
                 if (node->left) printTree(node->left, type);
                 if (node->right) printTree(node->right, type);
                 cout << node->value << " ";
             }
             else if (type == "IN") {
-                if (!node) return;
                 if (node->left) printTree(node->left, type);
                 cout << node->value << " ";
                 if (node->right) printTree(node->right, type);
