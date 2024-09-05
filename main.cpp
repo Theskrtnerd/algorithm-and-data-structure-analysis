@@ -61,52 +61,80 @@ class AVLTree {
             return node;
         };
         TreeNode* removeNode(TreeNode* node, int val) {
-            if(s.find(val) == s.end()) return node;
-            if(val < node->value) {
+            if (node == nullptr) return node;
+
+            // Search for the node to be deleted
+            if (val < node->value) {
                 node->left = removeNode(node->left, val);
             }
-            else if(val > node->value) {
+            else if (val > node->value) {
                 node->right = removeNode(node->right, val);
             }
             else {
-                if(!node->left && !node->right) {
-                    s.erase(val);
-                    node = nullptr;
-                }
-                else if (node->left && node->right) {
-                    TreeNode* temp = node->right;
-                    while(temp->left) {
-                        temp = temp->left;
+                // Node with no child or only one child
+                if (node->left == nullptr || node->right == nullptr) {
+                    TreeNode* temp = node->left ? node->left : node->right;
+
+                    // No child case
+                    if (temp == nullptr) {
+                        temp = node;
+                        node = nullptr;
                     }
-                    node->value = temp->value;
-                    temp = temp->right;
-                    s.erase(val);
+                    else { // One child case
+                        *node = *temp; // Copy the contents of the non-empty child
+                    }
+                    delete temp;
+                    s.erase(val); // Remove the value from the set
                 }
                 else {
-                    s.erase(val);
-                    TreeNode* temp = node->left ? node->left : node->right;
-                    node = temp;
+                    // Node with two children: Instead of using a helper function, find the in-order successor directly
+                    TreeNode* parent = node;
+                    TreeNode* temp = node->right;
+
+                    // Find the smallest node in the right subtree (in-order successor)
+                    while (temp->left != nullptr) {
+                        parent = temp;
+                        temp = temp->left;
+                    }
+
+                    // Copy the in-order successor's value to this node
+                    node->value = temp->value;
+
+                    // If the successor is a direct child of the node to be deleted
+                    if (parent == node) {
+                        parent->right = temp->right;
+                    }
+                    else {
+                        parent->left = temp->right;
+                    }
+
                     delete temp;
+                    s.erase(val); // Remove the value from the set
                 }
             }
 
-            if (!node) return node;
+            // If the tree had only one node
+            if (node == nullptr) return node;
+
+            // Update height and balance factor of the current node
             updateNode(node);
+
+            // Balance the node if it becomes unbalanced
             if (node->bal > 1) {
                 if (node->left->bal >= 0) {
-                    return rightRotate(node);
+                    return rightRotate(node); // Left Left Case
                 }
                 else {
-                    node->left = leftRotate(node->left);
+                    node->left = leftRotate(node->left); // Left Right Case
                     return rightRotate(node);
                 }
             }
             if (node->bal < -1) {
                 if (node->right->bal <= 0) {
-                    return leftRotate(node);
+                    return leftRotate(node); // Right Right Case
                 }
                 else {
-                    node->right = rightRotate(node->right);
+                    node->right = rightRotate(node->right); // Right Left Case
                     return leftRotate(node);
                 }
             }
