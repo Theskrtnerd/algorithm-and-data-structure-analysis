@@ -63,7 +63,6 @@ class AVLTree {
         TreeNode* removeNode(TreeNode* node, int val) {
             if (node == nullptr) return node;
 
-            // Search for the node to be deleted
             if (val < node->value) {
                 node->left = removeNode(node->left, val);
             }
@@ -71,36 +70,29 @@ class AVLTree {
                 node->right = removeNode(node->right, val);
             }
             else {
-                // Node with no child or only one child
                 if (node->left == nullptr || node->right == nullptr) {
                     TreeNode* temp = node->left ? node->left : node->right;
-
-                    // No child case
                     if (temp == nullptr) {
                         temp = node;
                         node = nullptr;
                     }
-                    else { // One child case
-                        *node = *temp; // Copy the contents of the non-empty child
+                    else {
+                        *node = *temp;
                     }
                     delete temp;
-                    s.erase(val); // Remove the value from the set
+                    s.erase(val);
                 }
                 else {
-                    // Node with two children: Instead of using a helper function, find the in-order successor directly
                     TreeNode* parent = node;
                     TreeNode* temp = node->right;
 
-                    // Find the smallest node in the right subtree (in-order successor)
                     while (temp->left != nullptr) {
                         parent = temp;
                         temp = temp->left;
                     }
 
-                    // Copy the in-order successor's value to this node
                     node->value = temp->value;
 
-                    // If the successor is a direct child of the node to be deleted
                     if (parent == node) {
                         parent->right = temp->right;
                     }
@@ -109,32 +101,29 @@ class AVLTree {
                     }
 
                     delete temp;
-                    s.erase(val); // Remove the value from the set
+                    s.erase(val);
                 }
             }
 
-            // If the tree had only one node
             if (node == nullptr) return node;
 
-            // Update height and balance factor of the current node
             updateNode(node);
 
-            // Balance the node if it becomes unbalanced
             if (node->bal > 1) {
                 if (node->left->bal >= 0) {
-                    return rightRotate(node); // Left Left Case
+                    return rightRotate(node);
                 }
                 else {
-                    node->left = leftRotate(node->left); // Left Right Case
+                    node->left = leftRotate(node->left);
                     return rightRotate(node);
                 }
             }
             if (node->bal < -1) {
                 if (node->right->bal <= 0) {
-                    return leftRotate(node); // Right Right Case
+                    return leftRotate(node);
                 }
                 else {
-                    node->right = rightRotate(node->right); // Right Left Case
+                    node->right = rightRotate(node->right);
                     return leftRotate(node);
                 }
             }
@@ -211,7 +200,6 @@ int main() {
             int x = stoi(word.substr(1));
             mytree->root = mytree->removeNode(mytree->root, x);
         } else {
-            // Process the final word for printTree(x)
             if (word == "IN" || word == "PRE" || word == "POST") {
                 mytree->printTree(mytree->root, word);
             }
