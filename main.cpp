@@ -1,5 +1,6 @@
 #include <iostream>
 #include <unordered_set>
+#include <sstream>
 using namespace std;
 
 class TreeNode {
@@ -21,11 +22,12 @@ class TreeNode {
 class AVLTree {
     public:
         TreeNode* root;
+        unordered_set<int> s;
         AVLTree() {
             root = nullptr;
         }
         TreeNode* insertNode(TreeNode* node, int val) {
-            if(s.find(val) != s.end()) return;
+            if(s.find(val) != s.end()) return node;
             if (node == nullptr) {
                 node = new TreeNode(val);
                 s.insert(val);
@@ -37,9 +39,7 @@ class AVLTree {
             else if(val > node->value) {
                 node->right = insertNode(node->right, val);
             }
-            
             updateNode(node);
-
             if(node->bal > 1) {
                 if (val < node->left->value) {
                     return rightRotate(node);
@@ -58,12 +58,59 @@ class AVLTree {
                     return leftRotate(node);
                 }
             }
-
             return node;
         };
-        TreeNode* removeNode(int val) {
-            if(s.find(val) == s.end()) return;
-            s.erase(val);
+        TreeNode* removeNode(TreeNode* node, int val) {
+            if(s.find(val) == s.end()) return node;
+            if(val < node->value) {
+                node->left = removeNode(node->left, val);
+            }
+            else if(val > node->value) {
+                node->right = removeNode(node->right, val);
+            }
+            else {
+                if(!node->left && !node->right) {
+                    node = nullptr;
+                    s.erase(val);
+                }
+                else if (node->left && node->right) {
+                    TreeNode* minVal = node->right;
+                    while(minVal->left) {
+                        minVal = minVal->left;
+                    }
+                    node->value = minVal->value;
+                    node->right = removeNode(node->right, minVal->value);
+                }
+                else {
+                    TreeNode* temp = node->left ? node->left : node->right;
+                    node = temp;
+                    delete temp;
+                    s.erase(val);
+                }
+            }
+
+            if (!node) return node;
+            updateNode(node);
+            if (node->bal > 1) {
+                if (node->left->bal >= 0) {
+                    return rightRotate(node);
+                }
+                else {
+                    node->left = leftRotate(node->left);
+                    return rightRotate(node);
+                }
+            }
+            if (node->bal < -1) {
+                if (node->right->bal <= 0) {
+                    return leftRotate(node);
+                }
+                else {
+                    node->right = rightRotate(node->right);
+                    return leftRotate(node);
+                }
+            }
+
+            return node;
         };
         void updateNode(TreeNode* node) {
             int hL =0, hR =0;
@@ -95,13 +142,52 @@ class AVLTree {
             this->updateNode(nodeL);
             return nodeL; 
         }
-        void printTree(string type) {
-
+        void printTree(TreeNode* node, string type) {
+            if (s.empty()) {
+                cout << "EMPTY" << endl;
+                return;
+            }
+            if(type == "PRE") {
+                if (!node) return;
+                cout << node->value << " ";
+                if (node->left) printTree(node->left, type);
+                if (node->right) printTree(node->right, type);
+            }
+            else if (type == "POST") {
+                if (!node) return;
+                if (node->left) printTree(node->left, type);
+                if (node->right) printTree(node->right, type);
+                cout << node->value << " ";
+            }
+            else if (type == "IN") {
+                if (!node) return;
+                if (node->left) printTree(node->left, type);
+                cout << node->value << " ";
+                if (node->right) printTree(node->right, type);
+            }
         }
-        unordered_set<int> s;
 };
 
 int main() {
+    AVLTree* mytree = new AVLTree();
+    string input;
+    getline(cin, input);
+    stringstream ss(input);
+    string word;
+    while (ss >> word) {
+        if (word[0] == 'A') {
+            int x = stoi(word.substr(1));
+            mytree->root = mytree->insertNode(mytree->root, x);
+        } else if (word[0] == 'D') {
+            int x = stoi(word.substr(1));
+            mytree->root = mytree->removeNode(mytree->root, x);
+        } else {
+            // Process the final word for printTree(x)
+            if (word == "IN" || word == "PRE" || word == "POST") {
+                mytree->printTree(mytree->root, word);
+            }
+        }
+    }
 
     return 0;
 }
