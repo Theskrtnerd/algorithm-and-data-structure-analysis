@@ -30,7 +30,6 @@ class AVLTree {
             if(s.find(val) != s.end()) return node;
             if (node == nullptr) {
                 node = new TreeNode(val);
-                cout << "Add " << val << endl;
                 s.insert(val);
                 return node;
             }
@@ -72,12 +71,10 @@ class AVLTree {
                 s.erase(val);
                 if (node->left == nullptr) {
                     TreeNode* temp = node->right;
-                    cout << "Remove " << val << endl;
                     delete node;
                     return temp;
                 } else if (node->right == nullptr) {
                     TreeNode* temp = node->left;
-                    cout << "Remove " << val << endl;
                     delete node;
                     return temp;
                 }
