@@ -26,7 +26,7 @@ class AVLTree {
         AVLTree() {
             root = nullptr;
         }
-        TreeNode* insertNode(TreeNode* node, int val) {
+        TreeNode* addNode(TreeNode* node, int val) {
             if(s.find(val) != s.end()) return node;
             if (node == nullptr) {
                 node = new TreeNode(val);
@@ -34,10 +34,10 @@ class AVLTree {
                 return node;
             }
             if (val < node->value) {
-                node->left = insertNode(node->left, val);
+                node->left = addNode(node->left, val);
             }
             else if(val > node->value) {
-                node->right = insertNode(node->right, val);
+                node->right = addNode(node->right, val);
             }
             updateNode(node);
             if(node->bal > 1) {
@@ -63,13 +63,11 @@ class AVLTree {
         TreeNode* removeNode(TreeNode* node, int val) {
             if (node == nullptr) return node;
 
-            // Perform standard BST delete
             if (val < node->value) {
                 node->left = removeNode(node->left, val);
             } else if (val > node->value) {
                 node->right = removeNode(node->right, val);
             } else {
-                // Node with only one child or no child
                 if (node->left == nullptr) {
                     TreeNode* temp = node->right;
                     delete node;
@@ -82,16 +80,13 @@ class AVLTree {
                     return temp;
                 }
 
-                // Node with two children
-                TreeNode* temp = minValueNode(node->right);
+                TreeNode* temp = maxValueNode(node->left);
                 node->value = temp->value;
-                node->right = removeNode(node->right, temp->value);
+                node->left = removeNode(node->left, temp->value);
             }
 
-            // Update height and balance factor
             updateNode(node);
 
-            // Rebalance the node if needed
             if (node->bal > 1) {
                 if (node->left->bal >= 0) {
                     return rightRotate(node);
@@ -111,20 +106,34 @@ class AVLTree {
 
             return node;
         }
-        TreeNode* minValueNode(TreeNode* node) {
+        TreeNode* maxValueNode(TreeNode* node) {
             TreeNode* current = node;
-            while (current && current->left != nullptr) {
-                current = current->left;
+            while (current && current->right != nullptr) {
+                current = current->right;
             }
             return current;
+        }
+        int updateHeight(TreeNode* node) {
+            if(!node) return 0;
+            int hL=0, hR=0;
+            if(node->left) {
+                hL = updateHeight(node->left);
+                node->left->height = hL;
+            }
+            if(node->right) {
+                hR = updateHeight(node->right);
+                node->right->height = hR;
+            }
+            node->height = 1 + max(hL, hR);
+            return node->height;
         }
         void updateNode(TreeNode* node) {
             int hL =0, hR =0;
             if(node->left) {
-                hL = node->left->height;
+                hL = updateHeight(node->left);
             }
             if(node->right) {
-                hR = node->right->height;
+                hR = updateHeight(node->right);
             }
             node->height = 1 + max(hL, hR); 
             node->bal = hL-hR;
@@ -181,7 +190,7 @@ int main() {
     while (ss >> word) {
         if (word[0] == 'A') {
             int x = stoi(word.substr(1));
-            mytree->root = mytree->insertNode(mytree->root, x);
+            mytree->root = mytree->addNode(mytree->root, x);
         } else if (word[0] == 'D') {
             int x = stoi(word.substr(1));
             mytree->root = mytree->removeNode(mytree->root, x);
