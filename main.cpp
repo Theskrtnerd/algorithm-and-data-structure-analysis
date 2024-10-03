@@ -15,8 +15,8 @@ int main() {
 
         if (operation == 'A') {
             int t = value[value.length()-1] - 'a';
-            while(v[t].second != "never used") {
-                if (v[t].first == value && v[t].second == "occupied") {
+            while(v[t].second == "occupied") {
+                if (v[t].first == value) {
                     break;
                 }
                 else {
