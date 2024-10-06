@@ -67,13 +67,21 @@ int main() {
     for (int i = 0; i < N; ++i) {
         getline(build_ss, temp, ',');
         for (int j = 0; j < N; ++j) {
-            build[i][j] = temp[j] - 'A';
+            if (islower(temp[j])) {
+                build[i][j] = temp[j] - 'A' - 6;
+            } else {
+                build[i][j] = temp[j] - 'A';
+            }
         }
     }
     for (int i = 0; i < N; ++i) {
         getline(destroy_ss, temp, ',');
         for (int j = 0; j < N; ++j) {
-            destroy[i][j] = temp[j] - 'A';
+            if (islower(temp[j])) {
+                destroy[i][j] = temp[j] - 'A' - 6;
+            } else {
+                destroy[i][j] = temp[j] - 'A';
+            }
         }
     }
     for (int i = 0; i < N; ++i) {
@@ -93,7 +101,7 @@ int main() {
 
 
     for(int i = 0; i < N; ++i) {
-        for(int j = i+1; j <N; ++j) {
+        for(int j = i+1; j < N; ++j) {
             if (country[i][j] == 1) {
                 de_edges.push_back({costs[i][j], {i, j}});
             }
@@ -111,11 +119,13 @@ int main() {
         int w = edge.first;
         int x = edge.second.first;
         int y = edge.second.second;
-        if (dsu.find(x) != dsu.find(y)) {
-            dsu.unite(x, y);
-        }
-        else {
-            ans += w;
+        if (country[x][y] == 1) {
+            if (dsu.find(x) != dsu.find(y)) {
+                dsu.unite(x, y);
+            }
+            else {
+                ans += w;
+            }
         }
     }
 
@@ -123,7 +133,7 @@ int main() {
         int w = edge.first;
         int x = edge.second.first;
         int y = edge.second.second;
-        if (dsu.find(x) != dsu.find(y)) {
+        if (country[x][y] == 0 && dsu.find(x) != dsu.find(y)) {
             dsu.unite(x, y);
             ans += w;
         }
